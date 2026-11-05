@@ -1,0 +1,6 @@
+{
+  "name": "OrigamiFlow - WhatsApp IA & CRM de Prospecção",
+  "description": "Plataforma de prospecção inteligente no WhatsApp com conexão Web, aquecimento em 2 etapas anti-bloqueio, variações com IA e pipeline CRM integrado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
