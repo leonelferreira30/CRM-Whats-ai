@@ -9,9 +9,12 @@ import {
   Download, 
   FileText,
   CheckCircle2,
-  Send
+  Send,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Lead, LeadStage } from '../types';
+import { ImportContactsModal } from './ImportContactsModal';
+import { getWhatsAppUrl } from '../utils/whatsapp';
 
 interface ContactsTabProps {
   leads: Lead[];
@@ -103,6 +106,12 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
 
   const loadSampleNicheDataset = (nicheName: string) => {
     const samples: Record<string, Array<{ name: string; phone: string; company: string }>> = {
+      'Gráficas & Comunicação Visual': [
+        { name: 'Marcos Silveira', phone: '+55 11 98922-3344', company: 'Gráfica Express & Offset' },
+        { name: 'Renata Castro', phone: '+55 19 99765-1122', company: 'Castro Comunicação Visual & Brindes' },
+        { name: 'Eduardo Guimarães', phone: '+55 21 98455-8899', company: 'MasterPrint Gráfica Rápida' },
+        { name: 'Cláudio Ferreira', phone: '+55 31 99122-4455', company: 'Ferreira Impressões & Banners' },
+      ],
       'Imobiliárias & Corretores': [
         { name: 'Guilherme Sampaio', phone: '+55 11 97722-1920', company: 'Sampaio Imóveis Jardins' },
         { name: 'Fernanda Lima', phone: '+55 11 98833-4411', company: 'Lopes Alto Padrão' },
@@ -121,7 +130,7 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
       ],
     };
 
-    const targetList = samples[nicheName] || samples['Clínicas Odontológicas'];
+    const targetList = samples[nicheName] || samples['Gráficas & Comunicação Visual'];
     const newItems: Lead[] = targetList.map((item) => ({
       id: `lead-sample-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: item.name,
@@ -152,10 +161,10 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5" />
-            <span>Importar CSV / Lista</span>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Importar Excel / .TXT</span>
           </button>
           <button
             onClick={() => setIsSingleModalOpen(true)}
@@ -173,6 +182,12 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
           Carregar listas de nicho prontas para testar:
         </span>
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => loadSampleNicheDataset('Gráficas & Comunicação Visual')}
+            className="px-2.5 py-1 rounded-md bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-emerald-500 transition-colors font-medium text-emerald-600 dark:text-emerald-400"
+          >
+            + Gráficas & Impressão
+          </button>
           <button
             onClick={() => loadSampleNicheDataset('Clínicas Odontológicas')}
             className="px-2.5 py-1 rounded-md bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-emerald-500 transition-colors"
@@ -292,11 +307,21 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
                       {lead.lastInteraction}
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
+                      <a
+                        href={getWhatsAppUrl(lead.phone, `Oi ${lead.name.split(' ')[0]}, tudo bem?`, 'web')}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-md hover:bg-emerald-100 transition-colors"
+                        title="Abrir diretamente no WhatsApp Web"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Whats Web</span>
+                      </a>
                       <button
                         onClick={() => onSelectLead(lead)}
-                        className="px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-md hover:bg-emerald-100 transition-colors"
+                        className="px-2.5 py-1 text-[11px] font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                       >
-                        Abrir Chat
+                        CRM Detalhes
                       </button>
                       <button
                         onClick={() => onDeleteLead(lead.id)}
@@ -385,51 +410,13 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
         </div>
       )}
 
-      {/* Bulk CSV / Text Import Modal */}
-      {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-neutral-900 dark:text-neutral-100">
-                Importação em Massa (CSV ou Copiar & Colar)
-              </h2>
-              <p className="text-xs text-neutral-500 mt-1">
-                Cole linhas com <code>Nome, Telefone, Nicho, Empresa</code> (separados por vírgula ou ponto-e-vírgula).
-              </p>
-            </div>
-
-            <textarea
-              rows={6}
-              value={importText}
-              onChange={(e) => setImportText(e.target.value)}
-              placeholder={`Dr. Rodrigo Ramos, 11988776655, Odontologia, Ramos Dental\nAna Cristina, 21977665544, Imobiliárias, Rio Imóveis\nLucas Mendes, 31966554433, Academias, Prime Fit`}
-              className="w-full p-3 text-xs rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-mono"
-            />
-
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-[11px] text-neutral-400">
-                {importText.split('\n').filter((l) => l.trim()).length} linhas detectadas
-              </span>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsImportModalOpen(false)}
-                  className="px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleBulkImport}
-                  disabled={!importText.trim()}
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-lg shadow-sm"
-                >
-                  Importar Lista
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Excel / TXT Import Modal */}
+      <ImportContactsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportLeads={onAddLeads}
+        defaultNiche="Gráficas & Comunicação Visual"
+      />
     </div>
   );
 };

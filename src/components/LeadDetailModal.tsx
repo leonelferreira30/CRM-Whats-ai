@@ -15,6 +15,7 @@ import {
   Tag
 } from 'lucide-react';
 import { Lead, LeadStage } from '../types';
+import { getWhatsAppUrl } from '../utils/whatsapp';
 
 interface LeadDetailModalProps {
   lead: Lead | null;
@@ -145,9 +146,9 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
     onMoveStage(lead.id, targetStage);
   };
 
-  const openWhatsAppWebDirect = () => {
-    const cleanNumber = lead.phone.replace(/\D/g, '');
-    window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}`, '_blank');
+  const openWhatsAppWebDirect = (messageToSend?: string) => {
+    const url = getWhatsAppUrl(lead.phone, messageToSend, 'web');
+    window.open(url, '_blank');
   };
 
   return (
@@ -180,7 +181,7 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={openWhatsAppWebDirect}
+              onClick={() => openWhatsAppWebDirect()}
               className="px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors flex items-center gap-1.5"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -272,13 +273,30 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
                 placeholder="Digite a mensagem para enviar..."
                 className="flex-1 p-2 text-xs rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
               />
-              <button
-                onClick={handleSendManual}
-                disabled={!inputText.trim()}
-                className="px-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg transition-colors flex items-center justify-center shrink-0"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = inputText;
+                    handleSendManual();
+                    openWhatsAppWebDirect(text);
+                  }}
+                  disabled={!inputText.trim()}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs"
+                  title="Abrir a conversa no WhatsApp Web com esta mensagem já digitada"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Enviar no Whats Web</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendManual}
+                  disabled={!inputText.trim()}
+                  className="px-3 py-1 text-[11px] text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                >
+                  Apenas Salvar
+                </button>
+              </div>
             </div>
           </div>
 
@@ -348,13 +366,25 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
                     <p className="text-[11px] text-neutral-700 dark:text-neutral-300 italic leading-relaxed">
                       "{aiAnalysis.suggestedResponse}"
                     </p>
-                    <button
-                      onClick={handleApplyAiResponse}
-                      className="w-full py-1.5 px-3 text-xs font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <Send className="w-3 h-3" />
-                      <span>Copiar para Envio</span>
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleApplyAiResponse}
+                        className="flex-1 py-1.5 px-2 text-xs font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Copiar p/ Campo</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openWhatsAppWebDirect(aiAnalysis.suggestedResponse)}
+                        className="flex-1 py-1.5 px-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs"
+                        title="Abrir o WhatsApp Web oficial com a resposta da IA já digitada"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Abrir no Whats</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

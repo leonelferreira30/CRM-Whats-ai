@@ -154,6 +154,16 @@ export default function App() {
     }));
   };
 
+  const handleResetLeadsToNew = () => {
+    setLeads((prev) =>
+      prev.map((lead) => ({
+        ...lead,
+        stage: 'new',
+        lastInteraction: 'Fila Resetada para Disparo',
+      }))
+    );
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col font-sans">
       {/* Universal Top Bar */}
@@ -184,6 +194,8 @@ export default function App() {
             onUpdateCampaign={(updated) => setCampaign((prev) => ({ ...prev, ...updated }))}
             leads={leads}
             onUpdateLeadStage={handleUpdateLeadStage}
+            onAddLeads={handleAddLeads}
+            onResetLeadsToNew={handleResetLeadsToNew}
             session={session}
             onOpenConnectModal={() => setIsConnectModalOpen(true)}
           />
